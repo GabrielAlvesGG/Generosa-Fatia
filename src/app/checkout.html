@@ -1,0 +1,269 @@
+﻿<dialog aria-label="Finalizar pedido" #dialog class="checkout-dialog" (close)="closed.emit()">
+  <button class="close" (click)="dialog.close()" aria-label="Fechar finalização">×</button>
+  <div class="dialog-body">
+    <span class="eyebrow">SEU MOMENTO ESTÁ QUASE AQUI</span>
+    <h2>{{ step === 4 ? 'Seu pedido' : 'Finalizar pedido' }}</h2>
+    <p class="demo-notice">Ambiente demonstrativo · Nenhuma cobrança será realizada.</p>
+    @if (step < 4) {
+      <ol class="steps">
+        <li [class.current]="step === 1">1. Pedido</li>
+        <li [class.current]="step === 2">2. Recebimento</li>
+        <li [class.current]="step === 3">3. Pagamento</li>
+      </ol>
+    }
+    @if (step === 1) {
+      @if (shop.count()) {
+        <app-cart (checkout)="next()" />
+      }
+      <div class="lookup">
+        <label for="lookup">Consultar um pedido demonstrativo</label>
+        <div class="lookup-row">
+          <input id="lookup" [(ngModel)]="lookup" placeholder="GF-XXXXXXXX" /><button
+            class="secondary"
+            [disabled]="busy || !lookup"
+            (click)="consult()"
+          >
+            Consultar
+          </button>
+        </div>
+      </div>
+    }
+    @if (step === 2) {
+      <h3>Como quer receber?</h3>
+      <div class="mode-options">
+        <label [class.chosen]="data.mode === 'pickup'"
+          ><input type="radio" name="mode" value="pickup" [(ngModel)]="data.mode" /> Retirar na loja
+          <small>Sem taxa</small></label
+        ><label [class.chosen]="data.mode === 'delivery'"
+          ><input type="radio" name="mode" value="delivery" [(ngModel)]="data.mode" /> Receber em
+          casa <small>Taxa de R$ 8,00</small></label
+        >
+      </div>
+      @if (data.mode === 'pickup') {
+        <p class="address-box">{{ shop.config.address }}</p>
+      } @else {
+        <p class="muted">
+          Área de exemplo: São Paulo, CEPs 01000-000 a 05999-999. Preenchimento manual, sem consulta
+          real.
+        </p>
+        <div class="form-grid">
+          <label
+            >CEP *<input
+              [(ngModel)]="data.cep"
+              inputmode="numeric"
+              autocomplete="postal-code"
+              maxlength="9"
+              placeholder="01000-000" /></label
+          ><label
+            >Cidade *<input
+              [(ngModel)]="data.city"
+              autocomplete="address-level2"
+              placeholder="São Paulo" /></label
+          ><label>Rua *<input [(ngModel)]="data.street" autocomplete="address-line1" /></label
+          ><label>Número *<input [(ngModel)]="data.number" maxlength="15" /></label
+          ><label>Bairro *<input [(ngModel)]="data.neighborhood" /></label
+          ><label>Complemento<input [(ngModel)]="data.extra" autocomplete="address-line2" /></label>
+        </div>
+      }
+      <label class="date-label"
+        >Qual dia? *<input
+          type="date"
+          [(ngModel)]="data.date"
+          (ngModelChange)="data.slot = ''"
+          [min]="today"
+          [max]="maxDate"
+      /></label>
+      <h3>Escolha o horário</h3>
+      <p class="muted">
+        Horário de São Paulo. Intervalos de 15 minutos; vagas demonstrativas. Fechado às segundas.
+      </p>
+      <div class="slots">
+        @for (s of slots; track s.time) {
+          <button
+            [disabled]="s.disabled"
+            [class.selected]="data.slot === s.time"
+            [attr.aria-pressed]="data.slot === s.time"
+            (click)="data.slot = s.time"
+          >
+            {{ s.time
+            }}<small>{{
+              s.past ? 'Encerrado' : s.capacity ? s.capacity + ' vagas' : 'Lotado'
+            }}</small>
+          </button>
+        }
+      </div>
+      <div class="checkout-actions">
+        <button class="text-button" (click)="step = 1">← Voltar</button
+        ><button class="primary" (click)="next()">Continuar →</button>
+      </div>
+    }
+    @if (step === 3) {
+      <h3>Seus dados</h3>
+      <p class="muted">Use dados fictícios para testar. Não é preciso criar uma conta.</p>
+      <div class="form-grid">
+        <label
+          >Nome e sobrenome *<input
+            [(ngModel)]="data.name"
+            autocomplete="name"
+            maxlength="100" /></label
+        ><label
+          >Telefone com DDD *<input
+            type="tel"
+            [(ngModel)]="data.phone"
+            autocomplete="tel"
+            maxlength="16"
+            placeholder="(11) 99999-9999"
+        /></label>
+      </div>
+      <h3>Resumo do pedido</h3>
+      <div class="review">
+        @for (l of shop.lines(); track l.productId + l.sauce) {
+          <p>
+            <span
+              >{{ l.quantity }} × {{ shop.product(l.productId).name
+              }}<small>{{ l.sauce }}</small></span
+            ><b>{{ (shop.unit(l) * l.quantity) / 100 | currency: 'BRL' }}</b>
+          </p>
+        }
+        <p>
+          <span>Subtotal</span><span>{{ shop.totals().subtotal / 100 | currency: 'BRL' }}</span>
+        </p>
+        <p class="saving">
+          <span>Economia da dupla</span
+          ><span>− {{ shop.totals().discount / 100 | currency: 'BRL' }}</span>
+        </p>
+        <p>
+          <span>Entrega</span><span>{{ delivery / 100 | currency: 'BRL' }}</span>
+        </p>
+        <p class="total">
+          <strong>Total</strong><strong>{{ total / 100 | currency: 'BRL' }}</strong>
+        </p>
+      </div>
+      <div class="address-box">
+        <strong
+          >{{ data.mode === 'pickup' ? 'Retirada' : 'Entrega' }} ·
+          {{ data.date | date: 'dd/MM/yyyy' }} às {{ data.slot }}</strong
+        >
+        <p>{{ address }}</p>
+      </div>
+      <fieldset>
+        <legend>Forma de pagamento</legend>
+        <label class="radio-row"
+          ><input type="radio" name="method" value="Pix" [(ngModel)]="data.method" /> Pix</label
+        ><label class="radio-row"
+          ><input type="radio" name="method" value="Cartão" [(ngModel)]="data.method" />
+          Cartão</label
+        >
+      </fieldset>
+      <label
+        >Resultado da simulação<select [(ngModel)]="payment">
+          <option value="approved">Pagamento aprovado</option>
+          <option value="declined">Pagamento recusado</option>
+          <option value="pending">Pagamento pendente</option>
+        </select></label
+      >
+      <p class="muted">
+        Não solicitamos dados de cartão nem geramos QR Code de pagamento nesta demonstração.
+      </p>
+      <div class="checkout-actions">
+        <button class="text-button" [disabled]="busy" (click)="step = 2">← Voltar</button
+        ><button class="primary" [disabled]="busy" (click)="pay()">
+          {{ busy ? 'Processando…' : 'Simular pagamento' }}
+        </button>
+      </div>
+    }
+    @if (step === 4 && order; as o) {
+      <div class="confirmation">
+        <span class="confirmation-icon">{{
+          o.payment === 'approved' ? '✓' : o.payment === 'pending' ? '◷' : '!'
+        }}</span>
+        <h2>
+          {{
+            o.payment === 'approved'
+              ? 'Um doce momento te espera!'
+              : o.payment === 'pending'
+                ? 'Aguardando pagamento'
+                : 'Pagamento recusado'
+          }}
+        </h2>
+        <strong>{{ o.id }}</strong>
+        <p>
+          Pagamento
+          {{
+            o.payment === 'approved'
+              ? 'aprovado'
+              : o.payment === 'pending'
+                ? 'pendente'
+                : 'recusado'
+          }}
+          · {{ o.data.method }}
+        </p>
+        <p>Pedido {{ o.status === 'confirmed' ? 'confirmado' : 'aguardando pagamento' }}</p>
+      </div>
+      <div class="review">
+        @for (l of o.lines; track l.productId + l.sauce) {
+          <p>
+            <span
+              >{{ l.quantity }} × {{ shop.product(l.productId).name
+              }}<small>{{ l.sauce }}</small></span
+            ><span>{{ (shop.unit(l) * l.quantity) / 100 | currency: 'BRL' }}</span>
+          </p>
+        }
+        <p>
+          <span>Subtotal</span><span>{{ o.subtotal / 100 | currency: 'BRL' }}</span>
+        </p>
+        <p class="saving">
+          <span>Economia</span><span>{{ o.discount / 100 | currency: 'BRL' }}</span>
+        </p>
+        <p>
+          <span>Entrega</span><span>{{ o.delivery / 100 | currency: 'BRL' }}</span>
+        </p>
+        <p class="total">
+          <strong>Total</strong><strong>{{ o.total / 100 | currency: 'BRL' }}</strong>
+        </p>
+      </div>
+      <div class="address-box">
+        <strong
+          >{{ o.data.mode === 'pickup' ? 'Retirada' : 'Entrega' }} ·
+          {{ o.data.date | date: 'dd/MM/yyyy' }} às {{ o.data.slot }}</strong
+        >
+        <p>
+          {{
+            o.data.mode === 'pickup'
+              ? shop.config.address
+              : o.data.street +
+                ', ' +
+                o.data.number +
+                ' — ' +
+                o.data.neighborhood +
+                ', ' +
+                o.data.city +
+                ' · ' +
+                o.data.cep +
+                (o.data.extra ? ' · ' + o.data.extra : '')
+          }}
+        </p>
+        <p>
+          {{
+            o.payment === 'approved'
+              ? 'Simulação concluída. Em um pedido real, apresente seu número na retirada ou aguarde a entrega.'
+              : 'A compra não está confirmada. Nenhum valor foi cobrado.'
+          }}
+        </p>
+      </div>
+      <p class="muted">
+        Os pedidos e seus status de teste ficam apenas neste navegador. Consultar não altera o
+        resultado simulado.
+      </p>
+      <div class="checkout-actions">
+        <button class="secondary" [disabled]="busy" (click)="consult(o.id)">Atualizar status</button
+        ><button class="primary" (click)="o.payment === 'approved' ? dialog.close() : restart()">
+          {{ o.payment === 'approved' ? 'Voltar às fatias' : 'Nova simulação' }}
+        </button>
+      </div>
+    }
+    @if (error) {
+      <p class="error" role="alert">{{ error }}</p>
+    }
+  </div>
+</dialog>

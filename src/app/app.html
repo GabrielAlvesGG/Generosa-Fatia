@@ -1,0 +1,261 @@
+﻿<div class="announcement">Feito com carinho. Servido em fatias generosas. <span>♡</span></div>
+<header>
+  <a class="brand" href="#" aria-label="Generosa Fatia início"
+    ><span class="brand-mark">g<span>f</span></span
+    ><span>generosa fatia<small>CONFEITARIA ARTESANAL</small></span></a
+  >
+  <nav>
+    <a href="#sabores">Nossas fatias</a><a href="#sobre">Feito com carinho</a
+    ><button class="bag" (click)="openCart()">
+      Seu pedido <span>{{ shop.count() }}</span>
+    </button>
+  </nav>
+</header>
+<main>
+  <section class="hero">
+    <div class="hero-copy">
+      <span class="eyebrow">PEQUENOS MOMENTOS. GENEROSAS FATIAS.</span>
+      <h1>A felicidade vem<br />em <em>camadas.</em></h1>
+      <p>
+        Recheio de sobra, ingredientes escolhidos<br class="desktop" />
+        e aquele gostinho de feito com carinho.
+      </p>
+      <a class="primary" href="#sabores">Escolher minhas fatias <span>↗</span></a>
+      <div class="hero-foot">
+        <span>♡ Feitas artesanalmente</span><span>◷ Fresquinhas, sempre</span>
+      </div>
+    </div>
+    <div class="hero-photo">
+      <img
+        src="/images/brigadeirao.webp"
+        alt="Fatia generosa de bolo de chocolate com brigadeiro cremoso"
+        width="700"
+        height="550"
+        fetchpriority="high"
+      />
+      <div class="photo-label">Mais recheio.<br /><em>Mais felicidade.</em></div>
+      <div class="round-seal">FEITO À MÃO<span>♡</span>COM AMOR</div>
+    </div>
+  </section>
+  <section class="promo">
+    <span class="promo-icon">♡</span>
+    <div>
+      <strong>Coisa boa fica melhor em dupla.</strong>
+      <p>Escolha 2 fatias de R$ 25 e pague <b>R$ 45</b>. É para dividir. Ou não.</p>
+    </div>
+    <span class="promo-tag">R$ 5 de carinho a mais</span>
+  </section>
+  <section id="sabores" class="catalog-section">
+    <div class="section-top">
+      <div>
+        <span class="eyebrow">ESCOLHA SEU MOMENTO DOCE</span>
+        <h2>Nossas fatias</h2>
+        <p>Uma mais generosa que a outra. Qual vai ser a sua?</p>
+      </div>
+      <span class="demo-label"><i></i> Catálogo demonstrativo</span>
+    </div>
+    <div class="shop-layout">
+      <div>
+        <div class="filters" aria-label="Filtrar sabores">
+          @for (c of categories; track c) {
+            <button
+              [class.active]="category === c"
+              [attr.aria-pressed]="category === c"
+              (click)="category = c"
+            >
+              {{ c }}
+            </button>
+          }
+          <span>Porção de felicidade, sem moderação.</span>
+        </div>
+        <div class="products">
+          @for (p of filtered; track p.id) {
+            <article class="product" [class.sold-out]="p.stock === 0">
+              <button
+                class="product-image"
+                (click)="open(p)"
+                [attr.aria-label]="'Ver detalhes de ' + p.name"
+              >
+                <img
+                  [src]="'/images/' + p.image + '.webp'"
+                  [alt]="'Fatia de ' + p.name"
+                  width="480"
+                  height="380"
+                  loading="lazy"
+                />
+                @if (p.tag) {
+                  <span class="tag">{{ p.tag }}</span>
+                }
+                @if (!p.stock) {
+                  <span class="tag">Volta em breve</span>
+                }
+              </button>
+              <div class="product-body">
+                <h3>
+                  <button (click)="open(p)">{{ p.name }}</button>
+                </h3>
+                <p>{{ p.description }}</p>
+                <div class="stock">
+                  <i [class.unavailable]="!p.stock"></i
+                  >{{
+                    p.stock ? shop.remaining(p.id) + ' fatias disponíveis' : 'Esgotado por hoje'
+                  }}
+                </div>
+                <div class="product-bottom">
+                  <div>
+                    <strong>{{ p.price / 100 | currency: 'BRL' }}</strong
+                    ><small>por fatia</small>
+                  </div>
+                  <button class="add-button" [disabled]="!shop.remaining(p.id)" (click)="open(p)">
+                    <span>+</span> Adicionar
+                  </button>
+                </div>
+              </div>
+            </article>
+          }
+        </div>
+        <p class="catalog-foot">
+          Nossas fatias contêm leite, ovos e glúten. Consulte os ingredientes antes de consumir.
+        </p>
+      </div>
+      <aside class="cart-panel"><app-cart (checkout)="startCheckout()" /></aside>
+    </div>
+  </section>
+  <section class="brand-story" id="sobre">
+    <span class="eyebrow">DA NOSSA COZINHA PARA O SEU MOMENTO</span>
+    <h2>Generosa no nome.<br /><em>Em cada detalhe também.</em></h2>
+    <p>
+      Acreditamos que uma boa fatia transforma o dia.<br />Por isso, caprichamos nas camadas, no
+      recheio e no cuidado.
+    </p>
+    <div>
+      <span>♡<br />Feito à mão</span><span>✧<br />Ingredientes escolhidos</span
+      ><span>♧<br />Generosamente recheado</span>
+    </div>
+  </section>
+</main>
+<footer>
+  <div class="brand">generosa fatia<small>UM PEDACINHO DE FELICIDADE.</small></div>
+  <div>
+    <strong>Venha buscar seu momento</strong>
+    <p>{{ shop.config.hours }}</p>
+    <p>{{ shop.config.address }}</p>
+  </div>
+  <div>
+    <button
+      (click)="
+        info =
+          'Entrega demonstrativa em São Paulo: CEPs de 01000-000 a 05999-999, taxa de R$ 8. Nenhuma consulta de CEP ou logística real é realizada.';
+        infoDialog.showModal()
+      "
+    >
+      Entrega e retirada ↗</button
+    ><button
+      (click)="
+        info =
+          'Neste ambiente não há cobrança nem pedido real. A política de cancelamento, redes sociais e o contato de suporte serão configurados antes da abertura da loja.';
+        infoDialog.showModal()
+      "
+    >
+      Cancelamento e suporte ↗
+    </button>
+    @if (shop.config.socialUrl) {
+      <a [href]="shop.config.socialUrl" target="_blank" rel="noopener noreferrer"
+        >Redes sociais ↗</a
+      >
+    } @else {
+      <small>Redes sociais: em breve</small>
+    }
+    @if (shop.config.supportUrl) {
+      <a [href]="shop.config.supportUrl" target="_blank" rel="noopener noreferrer"
+        >Falar com a loja ↗</a
+      >
+    }
+  </div>
+  <div class="footer-bottom">
+    © 2026 Generosa Fatia <span>Loja demonstrativa · Nenhum pagamento real</span
+    ><button (click)="checkoutOpen = true">Consultar pedido</button>
+  </div>
+</footer>
+<div class="toast" role="status">{{ shop.notice() }}</div>
+@if (shop.count() && !checkoutOpen && !cartOpen) {
+  <div class="mobile-bar">
+    <div>
+      {{ shop.count() }} fatia(s)<strong>{{ shop.totals().total / 100 | currency: 'BRL' }}</strong>
+    </div>
+    <button class="primary" (click)="openCart()">Ver pedido →</button>
+  </div>
+}
+<dialog
+  aria-label="Detalhes da fatia"
+  #productDialog
+  (close)="selected.set(null)"
+  (click)="onBackdrop($event)"
+>
+  @if (selected(); as p) {
+    <button class="close" aria-label="Fechar detalhes" (click)="close()">×</button
+    ><img
+      class="detail-image"
+      [src]="'/images/' + p.image + '.webp'"
+      [alt]="p.name"
+      width="600"
+      height="400"
+    />
+    <div class="dialog-body">
+      <span class="eyebrow">UMA ESCOLHA GENEROSA</span>
+      <h2>{{ p.name }}</h2>
+      <p>{{ p.description }}</p>
+      <p class="muted">Contém leite, ovos e glúten; pode conter castanhas.</p>
+      <fieldset>
+        <legend>Um toque extra de carinho?</legend>
+        @for (s of shop.sauces; track s.name) {
+          <label class="radio-row"
+            ><input type="radio" name="sauce" [value]="s.name" [(ngModel)]="sauce" /><span>{{
+              s.name
+            }}</span
+            ><small>{{ s.price ? '+ R$ 3,00' : 'Sem acréscimo' }}</small></label
+          >
+        }
+      </fieldset>
+      <div class="detail-actions">
+        <div class="stepper">
+          <button
+            [disabled]="quantity <= 1"
+            (click)="quantity = quantity - 1"
+            aria-label="Diminuir"
+          >
+            −</button
+          ><span>{{ quantity }}</span
+          ><button
+            [disabled]="quantity >= shop.remaining(p.id)"
+            (click)="quantity = quantity + 1"
+            aria-label="Aumentar"
+          >
+            +
+          </button>
+        </div>
+        <button class="primary" [disabled]="quantity > shop.remaining(p.id)" (click)="add()">
+          Adicionar · {{ selectionPrice / 100 | currency: 'BRL' }}
+        </button>
+      </div>
+    </div>
+  }
+</dialog>
+<dialog #cartDialog class="cart-drawer" aria-label="Seu pedido" (close)="cartOpen = false">
+  <section class="drawer">
+    <button class="close" (click)="closeCart()" aria-label="Fechar carrinho" autofocus>×</button
+    ><app-cart (checkout)="startCheckout()" /><button class="text-button" (click)="closeCart()">
+      Continuar escolhendo
+    </button>
+  </section>
+</dialog>
+@if (checkoutOpen) {
+  <app-checkout (closed)="checkoutOpen = false" />
+}
+<dialog aria-label="Informações da loja" #infoDialog>
+  <button class="close" (click)="infoDialog.close()" aria-label="Fechar">×</button>
+  <div class="dialog-body">
+    <h2>Bom saber</h2>
+    <p>{{ info }}</p>
+  </div>
+</dialog>
