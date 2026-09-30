@@ -1,4 +1,4 @@
-﻿import { Component, inject, input, output } from '@angular/core';
+import { Component, inject, input, output } from '@angular/core';
 import { CurrencyPipe } from '@angular/common';
 import { ShopService } from './shop.service';
 @Component({
@@ -20,7 +20,7 @@ import { ShopService } from './shop.service';
     @for (line of shop.lines(); track line.productId + line.sauce) {
       <div class="cart-line">
         <img
-          [src]="'/images/' + shop.product(line.productId).image + '.webp'"
+          [src]="'images/' + shop.product(line.productId).image + '.webp'"
           [alt]="shop.product(line.productId).name"
           width="64"
           height="64"

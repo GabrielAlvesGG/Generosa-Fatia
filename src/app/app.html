@@ -1,4 +1,4 @@
-﻿<div class="announcement">Feito com carinho. Servido em fatias generosas. <span>♡</span></div>
+<div class="announcement">Feito com carinho. Servido em fatias generosas. <span>♡</span></div>
 <header>
   <a class="brand" href="#" aria-label="Generosa Fatia início"
     ><span class="brand-mark">g<span>f</span></span
@@ -27,7 +27,7 @@
     </div>
     <div class="hero-photo">
       <img
-        src="/images/brigadeirao.webp"
+        src="images/brigadeirao.webp"
         alt="Fatia generosa de bolo de chocolate com brigadeiro cremoso"
         width="700"
         height="550"
@@ -77,7 +77,7 @@
                 [attr.aria-label]="'Ver detalhes de ' + p.name"
               >
                 <img
-                  [src]="'/images/' + p.image + '.webp'"
+                  [src]="'images/' + p.image + '.webp'"
                   [alt]="'Fatia de ' + p.name"
                   width="480"
                   height="380"
@@ -196,7 +196,7 @@
     <button class="close" aria-label="Fechar detalhes" (click)="close()">×</button
     ><img
       class="detail-image"
-      [src]="'/images/' + p.image + '.webp'"
+      [src]="'images/' + p.image + '.webp'"
       [alt]="p.name"
       width="600"
       height="400"
